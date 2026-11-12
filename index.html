@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Biodata Siswa</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#eef2f7;color:#1e293b;padding:16px 12px 40px}
+.wrap{max-width:820px;margin:0 auto}
+h1{font-family:"Times New Roman",serif;text-align:center;letter-spacing:1px;margin:8px 0 2px;font-size:26px}
+.sub{text-align:center;color:#64748b;font-size:14px;margin-bottom:18px}
+.top{display:flex;gap:16px;align-items:flex-start;background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px #0001;margin-bottom:14px}
+.photo{width:120px;height:160px;border:2px solid #1e293b;border-radius:4px;background:#f8fafc center/cover no-repeat;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:#94a3b8;cursor:pointer}
+.topinfo{flex:1;font-size:14px;color:#475569;line-height:1.5}
+.btn{border:0;border-radius:10px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;background:#2563eb;color:#fff}
+.btn.sec{background:#e2e8f0;color:#1e293b}
+.btn.red{background:#dc2626}
+.btn.grn{background:#059669}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.card{background:#fff;border-radius:14px;padding:12px 14px 14px;box-shadow:0 1px 4px #0001;margin-bottom:10px}
+.card label{display:block;font-weight:700;font-size:14px;margin-bottom:6px;color:#334155}
+.card label span{display:inline-block;min-width:26px;color:#2563eb}
+.fw{position:relative;display:inline-block;max-width:100%;vertical-align:top}
+.fw textarea,.fw input{display:block;font:16px "Times New Roman",serif;font-size:17px;padding:10px 30px 10px 12px;border:1.5px solid #cbd5e1;border-radius:10px;width:min(100%,780px);min-width:120px;min-height:44px;resize:none;outline:none;background:#fff;color:#0f172a;overflow:auto}
+.fw textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px #2563eb22}
+.grip{position:absolute;right:3px;bottom:3px;width:26px;height:26px;cursor:nwse-resize;touch-action:none;color:#94a3b8;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.grip:hover{background:#e2e8f0;color:#2563eb}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chips button{border:1.5px solid #cbd5e1;background:#f8fafc;border-radius:999px;padding:6px 14px;font-size:14px;cursor:pointer;color:#334155}
+.chips button.on{background:#2563eb;border-color:#2563eb;color:#fff}
+.anak{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:600}
+.anak input{width:70px;font:17px "Times New Roman",serif;padding:10px;border:1.5px solid #cbd5e1;border-radius:10px;text-align:center}
+.actions{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px #0001;margin-top:14px}
+.hint{font-size:13px;color:#64748b;margin-top:10px;line-height:1.5}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+#modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:50;padding:12px}
+#modal.on{display:flex}
+.box{background:#fff;border-radius:16px;padding:16px;width:min(360px,100%);text-align:center}
+.box h3{margin:0 0 4px}
+.box p{margin:0 0 10px;font-size:13px;color:#64748b}
+#cv{width:min(300px,100%);aspect-ratio:3/4;border:2px solid #1e293b;border-radius:4px;touch-action:none;cursor:grab;background:#e2e8f0}
+.box input[type=range]{width:100%;margin:12px 0}
+@media(max-width:480px){.photo{width:96px;height:128px}.top{padding:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>BIODATA SISWA</h1>
+  <div class="sub">Isi data dengan lengkap dan benar</div>
+
+  <div class="top">
+    <div class="photo" id="photo" onclick="pick.click()">Ketuk untuk<br>upload foto<br>(3 × 4)</div>
+    <div class="topinfo">
+      <b>Pas foto siswa</b><br>Unggah foto lalu geser &amp; perbesar untuk menyesuaikan dengan bingkai (crop).
+      <div class="btns">
+        <button class="btn" onclick="pick.click()">Pilih Foto</button>
+        <button class="btn sec" id="delPhoto" style="display:none" onclick="setPhoto(null)">Hapus</button>
+      </div>
+      <input type="file" id="pick" accept="image/*" hidden>
+    </div>
+  </div>
+
+  <div id="fields"></div>
+
+  <div class="actions">
+    <b>Simpan hasil isian</b>
+    <div class="btns">
+      <button class="btn red" onclick="dlPDF()">⬇ Unduh PDF (F4)</button>
+      <button class="btn grn" onclick="dlHTML()">⬇ Unduh HTML</button>
+      <button class="btn sec" onclick="resetAll()">Kosongkan</button>
+    </div>
+    <div class="hint">Di <b>iPhone/iPad</b>, setelah menekan tombol unduh akan muncul menu bagikan — pilih <b>“Simpan ke Berkas”</b>. Di <b>Android/tablet</b>, file tersimpan otomatis di folder Unduhan.</div>
+  </div>
+</div>
+
+<div id="modal"><div class="box">
+  <h3>Sesuaikan Foto</h3>
+  <p>Geser foto &amp; atur zoom agar pas di bingkai</p>
+  <canvas id="cv" width="300" height="400"></canvas>
+  <input type="range" id="zoom" min="1" max="4" step="0.01" value="1">
+  <div class="btns" style="justify-content:center">
+    <button class="btn sec" onclick="closeCrop()">Batal</button>
+    <button class="btn" onclick="applyCrop()">Gunakan Foto</button>
+  </div>
+</div></div>
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const FIELDS=[
+ ['Nama'],['NISN'],['Tempat, tanggal lahir'],['Anak ke','anak'],['Alamat','big'],['No HP'],
+ ['Nama Bapak'],['Pekerjaan Bapak'],['No HP Bapak'],
+ ['Nama Ibu'],['Pekerjaan Ibu'],['No HP Ibu'],
+ ['Nama Wali'],['Pekerjaan Wali'],['No HP Wali'],['Alamat Wali','big'],['Transportasi ke Sekolah'],
+ ['Jalur Masuk saat SPMB','',['Rapor','Prestasi Non Akademik','IQ']],
+ ['Peminatan','',['IPA','IPS','Bahasa']],
+ ['Minat Bidang Pekerjaan'],
+ ['Aktivitas di Luar Sekolah','big'],
+ ['Kesulitan yang Ditemui setelah Belajar di SMA','big'],
+ ['Komitmen untuk Meraih Minat yang Diinginkan','big']
+];
+const GRIP='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v7H5M12 12L6 6M12 8.5V12H8.5"/></svg>';
+let photo=null;
+
+/* ---------- bangun form ---------- */
+const host=$('fields');
+FIELDS.forEach((f,i)=>{
+  const c=document.createElement('div');c.className='card';
+  const no=i+1;
+  if(f[1]==='anak'){
+    c.innerHTML=`<label><span>${no}.</span>${f[0]}</label><div class="anak"><input id="a1" inputmode="numeric" placeholder="…"> dari <input id="a2" inputmode="numeric" placeholder="…"> Bersaudara</div>`;
+  }else{
+    c.innerHTML=`<label for="f${i}"><span>${no}.</span>${f[0]}</label><div class="fw"><textarea id="f${i}" rows="${f[1]==='big'?3:1}" ${/HP/.test(f[0])?'inputmode="tel"':''} autocomplete="off"></textarea><div class="grip" title="Tarik untuk memperbesar kolom">${GRIP}</div></div>`;
+    const ta=c.querySelector('textarea');
+    if(f[1]==='big')ta.style.height='100px';
+    ta.addEventListener('input',()=>{ if(ta.scrollHeight>ta.clientHeight)ta.style.height=ta.scrollHeight+2+'px'; });
+    const g=c.querySelector('.grip');
+    g.addEventListener('pointerdown',e=>{
+      e.preventDefault();g.setPointerCapture(e.pointerId);
+      const sx=e.clientX,sy=e.clientY,sw=ta.offsetWidth,sh=ta.offsetHeight;
+      const mv=ev=>{ta.style.height=Math.max(44,sh+ev.clientY-sy)+'px';ta.style.width=Math.max(120,sw+ev.clientX-sx)+'px'};
+      const up=()=>{g.removeEventListener('pointermove',mv);g.removeEventListener('pointerup',up);g.removeEventListener('pointercancel',up)};
+      g.addEventListener('pointermove',mv);g.addEventListener('pointerup',up);g.addEventListener('pointercancel',up);
+    });
+  }
+  if(f[2]){
+    const ta=c.querySelector('textarea'),row=document.createElement('div');row.className='chips';
+    f[2].forEach(o=>{
+      const b=document.createElement('button');b.type='button';b.textContent=o;
+      b.onclick=()=>{ta.value=o;row.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
+      row.appendChild(b);
+    });
+    ta.addEventListener('input',()=>row.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.textContent===ta.value.trim())));
+    c.appendChild(row);
+  }
+  host.appendChild(c);
+});
+
+function vals(){
+  return FIELDS.map((f,i)=>{
+    let v;
+    if(f[1]==='anak'){const a=$('a1').value.trim(),b=$('a2').value.trim();v=(a||b)?`${a||'…'} dari ${b||'…'} Bersaudara`:'';}
+    else v=$('f'+i).value.trim();
+    return [i+1,f[0],v];
+  });
+}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),3200)}
+function setPhoto(d){
+  photo=d;const p=$('photo');
+  p.style.backgroundImage=d?`url(${d})`:'';p.innerHTML=d?'':'Ketuk untuk<br>upload foto<br>(3 × 4)';
+  $('delPhoto').style.display=d?'':'none';
+}
+function resetAll(){
+  if(!confirm('Kosongkan semua isian dan foto?'))return;
+  document.querySelectorAll('textarea,.anak input').forEach(e=>{e.value=''});
+  setPhoto(null);
+}
+
+/* ---------- crop foto ---------- */
+const cv=$('cv'),cx=cv.getContext('2d'),zoom=$('zoom');
+let im,sc,smin,ox,oy;const ptr=new Map();let pd=0;
+$('pick').addEventListener('change',e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{im=new Image();im.onload=()=>{
+    smin=Math.max(300/im.width,400/im.height);sc=smin;
+    ox=(300-im.width*sc)/2;oy=(400-im.height*sc)/2;zoom.value=1;
+    $('modal').classList.add('on');draw();
+  };im.src=r.result};
+  r.readAsDataURL(f);
+});
+function clamp(){ox=Math.min(0,Math.max(300-im.width*sc,ox));oy=Math.min(0,Math.max(400-im.height*sc,oy))}
+function draw(){clamp();cx.clearRect(0,0,300,400);cx.drawImage(im,ox,oy,im.width*sc,im.height*sc)}
+function setScale(ns){
+  ns=Math.min(smin*4,Math.max(smin,ns));
+  ox=150-(150-ox)*ns/sc;oy=200-(200-oy)*ns/sc;sc=ns;zoom.value=sc/smin;draw();
+}
+zoom.addEventListener('input',()=>setScale(smin*zoom.value));
+cv.addEventListener('wheel',e=>{e.preventDefault();setScale(sc*(e.deltaY<0?1.08:0.93))},{passive:false});
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptr.set(e.pointerId,[e.clientX,e.clientY]);pd=0});
+cv.addEventListener('pointermove',e=>{
+  if(!ptr.has(e.pointerId))return;
+  const k=300/cv.getBoundingClientRect().width,o=ptr.get(e.pointerId);
+  if(ptr.size===1){ox+=(e.clientX-o[0])*k;oy+=(e.clientY-o[1])*k;ptr.set(e.pointerId,[e.clientX,e.clientY]);draw()}
+  else{
+    ptr.set(e.pointerId,[e.clientX,e.clientY]);
+    const [a,b]=[...ptr.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);
+    if(pd)setScale(sc*d/pd);pd=d;
+  }
+});
+['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,e=>{ptr.delete(e.pointerId);pd=0}));
+function closeCrop(){$('modal').classList.remove('on')}
+function applyCrop(){
+  const o=document.createElement('canvas');o.width=600;o.height=800;
+  const c=o.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,600,800);
+  c.drawImage(im,ox*2,oy*2,im.width*sc*2,im.height*sc*2);
+  setPhoto(o.toDataURL('image/jpeg',0.9));closeCrop();
+}
+
+/* ---------- render halaman F4 (215 x 330 mm @150dpi) ---------- */
+const W=1270,H=1949,M=120;
+function buildPages(){
+  const pages=[];let c,x,y;
+  const FONT=s=>`${s}px "Times New Roman",Times,serif`;
+  function newPage(first){
+    c=document.createElement('canvas');c.width=W;c.height=H;x=c.getContext('2d');
+    x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#000';pages.push(c);
+    if(first){
+      x.font='bold '+FONT(42).replace(/^/,'');x.textAlign='center';x.fillText('BIODATA SISWA',(M+W-M-260)/2,230);x.textAlign='left';
+      x.lineWidth=3;x.strokeStyle='#000';x.strokeRect(W-M-240,110,240,320);
+      y=520;
+    }else y=M+30;
+  }
+  function wrap(t,mw){
+    const out=[];
+    String(t).split('\n').forEach(par=>{
+      let line='';
+      par.split(' ').forEach(w=>{
+        while(x.measureText(w).width>mw){ // pecah kata panjang
+          let k=w.length;while(k>1&&x.measureText(w.slice(0,k)).width>mw)k--;
+          if(line){out.push(line);line=''}
+          out.push(w.slice(0,k));w=w.slice(k);
+        }
+        const t2=line?line+' '+w:w;
+        if(x.measureText(t2).width>mw&&line){out.push(line);line=w}else line=t2;
+      });
+      out.push(line);
+    });
+    return out;
+  }
+  const CX=540,VX=565,VW=W-M-VX,LH=46;
+  newPage(true);
+  const draw1=()=>{};
+  const jobs=vals();
+  const pic=new Image();
+  return new Promise(res=>{
+    const go=()=>{
+      if(photo)pages[0].getContext('2d').drawImage(pic,W-M-240+3,113,234,314);
+      jobs.forEach(([no,lab,v])=>{
+        x.font='bold '+FONT(28);
+        const ll=wrap(`${no}. ${lab}`,CX-M-25);
+        x.font=FONT(29);
+        const lines=v?wrap(v,VW):[''];
+        const rh=Math.max(lines.length,ll.length)*LH+26;
+        if(y+rh>H-M){newPage(false);x.font=FONT(29)}
+        x.fillStyle='#000';x.font='bold '+FONT(28);
+        ll.forEach((t,i)=>x.fillText(t,M,y+LH*(i+1)-12));
+        x.font=FONT(29);x.fillText(':',CX,y+LH-12);
+        lines.forEach((l,i)=>{
+          const by=y+LH*(i+1)-12;
+          x.fillStyle='#000';x.fillText(l,VX,by);
+          x.save();x.setLineDash([2,6]);x.lineWidth=2;x.strokeStyle='#333';
+          x.beginPath();x.moveTo(VX,by+9);x.lineTo(W-M,by+9);x.stroke();x.restore();
+        });
+        y+=rh;
+      });
+      res(pages);
+    };
+    if(photo){pic.onload=go;pic.src=photo}else go();
+  });
+}
+
+/* ---------- PDF tanpa library ---------- */
+function makePDF(jpgs){
+  const PW=609.45,PH=935.43,enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const push=b=>{if(typeof b==='string')b=enc.encode(b);parts.push(b);len+=b.length};
+  const obj=(n,fn)=>{offs[n]=len;push(n+' 0 obj\n');fn();push('\nendobj\n')};
+  const N=jpgs.length,total=2+3*N;
+  push('%PDF-1.4\n');
+  obj(1,()=>push('<</Type/Catalog/Pages 2 0 R>>'));
+  obj(2,()=>push(`<</Type/Pages/Kids[${jpgs.map((_,i)=>(3+3*i)+' 0 R').join(' ')}]/Count ${N}>>`));
+  jpgs.forEach((j,i)=>{
+    const p=3+3*i,s=`q ${PW} 0 0 ${PH} 0 0 cm /Im0 Do Q`;
+    obj(p,()=>push(`<</Type/Page/Parent 2 0 R/MediaBox[0 0 ${PW} ${PH}]/Resources<</XObject<</Im0 ${p+2} 0 R>>>>/Contents ${p+1} 0 R>>`));
+    obj(p+1,()=>push(`<</Length ${s.length}>>\nstream\n${s}\nendstream`));
+    obj(p+2,()=>{push(`<</Type/XObject/Subtype/Image/Width ${W}/Height ${H}/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${j.length}>>\nstream\n`);push(j);push('\nendstream')});
+  });
+  const xo=len;
+  push(`xref\n0 ${total+1}\n0000000000 65535 f \n`);
+  for(let i=1;i<=total;i++)push(String(offs[i]).padStart(10,'0')+' 00000 n \n');
+  push(`trailer\n<</Size ${total+1}/Root 1 0 R>>\nstartxref\n${xo}\n%%EOF`);
+  return new Blob(parts,{type:'application/pdf'});
+}
+const b64=d=>{const s=atob(d.split(',')[1]),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+const fname=ext=>'Biodata_'+(($('f0').value.trim()||'Siswa').replace(/[^\w\-]+/g,'_'))+'.'+ext;
+
+async function save(blob,name){
+  const file=new File([blob],name,{type:blob.type});
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(ios&&navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:name});return}catch(e){if(e.name==='AbortError')return}
+  }
+  const u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),60000);
+}
+async function dlPDF(){
+  toast('Membuat PDF…');
+  try{
+    const pages=await buildPages();
+    const jpgs=pages.map(p=>b64(p.toDataURL('image/jpeg',0.92)));
+    await save(makePDF(jpgs),fname('pdf'));toast('PDF siap');
+  }catch(e){toast('Gagal membuat PDF: '+e.message)}
+}
+
+/* ---------- unduh HTML ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+async function dlHTML(){
+  const rows=vals().map(([n,l,v])=>`<tr><td class="n">${n}.</td><td class="l">${esc(l)}</td><td class="c">:</td><td class="v">${esc(v)||'&nbsp;'}</td></tr>`).join('');
+  const html=`<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Biodata Siswa</title><style>
+@page{size:215mm 330mm;margin:15mm}body{font-family:"Times New Roman",serif;margin:0;padding:20px;color:#000;background:#fff}
+.pg{max-width:780px;margin:0 auto;position:relative;padding-top:6px}
+h1{font-size:22px;text-align:center;margin:30px 0 0;padding-right:170px}
+.ph{position:absolute;right:0;top:0;width:150px;height:200px;border:2px solid #000;object-fit:cover}
+table{border-collapse:collapse;width:100%;margin-top:${photo?'110':'110'}px;font-size:16px}
+td{padding:6px 2px;vertical-align:top}.n{width:34px;font-weight:bold}.l{width:190px;font-weight:bold}.c{width:14px}
+.v{border-bottom:1.5px dotted #333;white-space:pre-wrap;word-break:break-word}
+</style></head><body><div class="pg">${photo?`<img class="ph" src="${photo}" alt="Foto">`:'<div class="ph"></div>'}<h1>BIODATA SISWA</h1><table>${rows}</table></div></body></html>`;
+  await save(new Blob([html],{type:'text/html'}),fname('html'));toast('HTML siap');
+}
+</script>
+</body>
+</html>
